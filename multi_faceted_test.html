@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+        <head>
+        <style>
+        button {
+                font-family: Calibri, sans-serif;
+                border: none;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                font-size: 36px;
+                cursor: pointer;
+                
+                font-weight: 1000;
+                display: block;
+                position: absolute;
+        }
+        h1 {
+                font-family: Calibri, sans-serif;
+                text-align: center;
+        }
+        #btn1 {
+                top: 200px;
+                left: 760px;
+        }
+        #btn2 {
+                top: 500px;
+                left: 200px;
+        }
+        #btn3 {
+                top: 130px;
+                left: 100px;
+        }
+        #btn4 {
+                top: 300px;
+                left: 1300px;
+        }
+        #impossible {
+                top: 0px;
+                left: 1200px;
+        }
+        </style>
+        </head>
+        
+        <body>
+        <h1 id=task>Click Impossible to start</h1>
+        <button type="button" onclick="handleButtonClick(this.id)" id=btn1>Red</button>
+        
+        <button type="button" onclick="handleButtonClick(this.id)" id=btn2>Green</button>
+        
+        <button type="button" onclick="handleButtonClick(this.id)" id=btn3>Yellow</button>
+        
+        <button type="button" onclick="handleButtonClick(this.id)" id=btn4>Blue</button>
+        
+        <button type="button" onclick="invalid()" id=impossible>Impossible</button>
+
+
+        <script>
+        var currentTries = 0;
+        var updateTries = 10;
+        var maxTries = 160;
+        var correctClick = 0;
+        
+        var durationInMilliseconds = 0;
+        var start;
+        var waitTime = 0;
+        var reactionTime = 0;
+        var lastClickDuration;
+        
+        // 0 for matching text color, 1 for matching box color,
+        // 2 for matching word, 3 for patience
+        var taskCategory = 0;
+        var target;
+        var colors = ["red", "yellow", "green", "blue"];
+        
+        function updateDuration() {
+                var stop = new Date();
+                reactionTime = stop.getTime() - start.getTime();
+                
+                if (taskCategory != 3){
+                        durationInMilliseconds += reactionTime;
+                }
+        }
+        
+        function updateTask() {
+                var currentTask = document.getElementById("task");
+                
+                console.log(currentTries + " / " + updateTries + " with " + correctClick + " correct.");
+                if(currentTries >= maxTries) {       // The trial is completed.
+                        var newMsg = "Trial Complete. Total time: " + durationInMilliseconds + " ms.\n";
+                        newMsg += "Accuracy percentage: " + (correctClick * 100 / currentTries) + "%";
+                        currentTask.innerHTML = newMsg;
+                        return;
+                }
+                
+                if(currentTries == updateTries) {
+                        taskCategory = Math.floor(Math.random()*4);
+                        updateTries += Math.floor(Math.random() * 8) + 5;
+                }
+                
+                currentTries++;
+
+                target = colors[Math.floor(Math.random()*4)];
+                if(taskCategory == 0) {
+                        currentTask.innerHTML = "Click the Button with the " + target + " colored text";
+                }
+                else if(taskCategory == 1) {
+                        currentTask.innerHTML = "Click the Button with the " + target + " background";
+                }
+                else if(taskCategory == 2) {
+                        currentTask.innerHTML = "Click the Button with the word " + target;
+                }
+                
+                start = new Date();
+                
+                if(taskCategory == 3) {
+                        currentTask.innerHTML = "Click a Button when this message changes";
+                        waitTime = Math.floor(Math.random()*6000) + 200;
+                        start = new Date();
+                        setTimeout(updateTimeMsg, waitTime);
+                }
+                
+        }
+        
+        function updateTimeMsg() {
+                document.getElementById("task").innerHTML = "Click now";
+        }
+        
+        function updateButton(id) {
+                var btn = document.getElementById(id);
+                var i = Math.floor(Math.random()*490) + 100;
+                var j = Math.floor(Math.random()*1360)+1;
+                //console.log('here' , i ,j , btn.style.top , btn.style.left);
+                btn.style.top = i+"px";
+                btn.style.left = j+"px";
+                
+                // Update color in box
+                var textColor = Math.floor(Math.random() * 4);
+                btn.innerHTML = colors[Math.floor(Math.random() * 4)];
+                btn.style.color = colors[textColor];
+                
+                var backColor = Math.floor(Math.random() * 4);
+                while(backColor == textColor) {
+                        backColor = Math.floor(Math.random() * 4);
+                }
+                btn.style.background = colors[backColor];
+        }
+        
+        function handleButtonClick(id) {
+                if(currentTries >= maxTries) {       // The trial is completed.
+                        var newMsg = "Trial Complete. Total time: " + durationInMilliseconds + " ms.\n";
+                        newMsg += "Accuracy percentage: " + (correctClick * 100 / currentTries) + "%";
+                        document.getElementById("task").innerHTML = newMsg;
+                        return;
+                }
+                updateDuration();
+                
+                var btn = document.getElementById(id);
+                // Check correctness
+                if (taskCategory == 3){
+                        if(reactionTime >= waitTime) {
+                                correctClick++;
+                                durationInMilliseconds += (reactionTime - waitTime);
+                                updateButton(id);
+                                updateTask();
+                        }
+                } else {
+                        if(taskCategory == 0) {
+                                if(btn.style.color == target)
+                                        correctClick++;
+                        } else if (taskCategory == 1) {
+                                if(btn.style.background == target)
+                                        correctClick++;
+                        } else if (taskCategory == 2) {
+                                if(btn.innerHTML == target)
+                                        correctClick++;
+                        }
+                        updateButton(id);
+                        updateTask();
+                }
+                
+        }
+        
+        function invalid() {
+                if(currentTries >= maxTries) {       // The trial is completed.
+                        var newMsg = "Trial Complete. Total time: " + durationInMilliseconds + " ms.\n";
+                        newMsg += "Accuracy percentage: " + (correctClick * 100 / currentTries) + "%";
+                        document.getElementById("task").innerHTML = newMsg;
+                        return;
+                }
+                
+                if(currentTries > 0) {
+                        currentTries++;
+                        updateDuration();
+                        correctClick++;
+                        for(var i = 1; i < 5; i++) {
+                                var btn = document.getElementById("btn" + i);
+                                if(taskCategory == 0) {
+                                        if(btn.style.color == target) {
+                                                correctClick--;
+                                                break;
+                                        }
+                                } else if (taskCategory == 1) {
+                                        if(btn.style.background == target) {
+                                                correctClick--;
+                                                break;
+                                        }
+                                } else if (taskCategory == 2) {
+                                        if(btn.innerHTML == target) {
+                                                correctClick--;
+                                                break;
+                                        }
+                                }
+                        }
+                        currentTries--;                        
+                }
+                
+                for(var i = 1; i < 5; i++) {
+                        updateButton("btn" + i);
+                }
+                updateTask();
+        }
+        
+        </script>
+        </body>
+</html>
