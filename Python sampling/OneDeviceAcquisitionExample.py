@@ -54,7 +54,7 @@ class NewDevice(plux.SignalsDev):
 
 def exampleAcquisition(
     address="BTH00:21:08:01:10:DE",
-    duration=10,
+    duration=60,
     frequency=1000,
     code=0x3F,
     num=0,
@@ -73,7 +73,7 @@ def exampleAcquisition(
     7 channels - 2000, 8 channels - 2000
     """
     global path_name
-    path_name = f'sample_resp_{num}.txt'
+    path_name = f'Data_{num}.txt'
     with open(path_name, 'w') as file:
         pass
     device = NewDevice(address)
@@ -92,5 +92,4 @@ def exampleAcquisition(
 if __name__ == "__main__":
     # Use arguments from the terminal (if any) as the first arguments and use the remaining default values.
     # print("Found: ", plux.BaseDev.findDevices('BTH'))
-    for i in range(5):
-        exampleAcquisition(*sys.argv[1:], num=i)
+    exampleAcquisition(*sys.argv[1:], num=0)
